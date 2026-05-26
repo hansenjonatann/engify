@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { headers } from "next/headers";
 
-const prisma = new PrismaClient();
+export const dynamic = "force-dynamic";
 
-export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -20,12 +23,15 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     await prisma.vocabularyBank.delete({
       where: {
         id: id,
-        userId: session.user.id // Ensure they only delete their own
-      }
+        userId: session.user.id, // Ensure they only delete their own
+      },
     });
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    return NextResponse.json({ error: "Not Found or Unauthorized" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Not Found or Unauthorized" },
+      { status: 400 },
+    );
   }
 }

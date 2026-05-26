@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { headers } from "next/headers";
 
-const prisma = new PrismaClient();
+export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
   const session = await auth.api.getSession({
@@ -16,7 +16,7 @@ export async function GET(req: Request) {
 
   const vocab = await prisma.vocabularyBank.findMany({
     where: { userId: session.user.id },
-    orderBy: { createdAt: "desc" }
+    orderBy: { createdAt: "desc" },
   });
 
   return NextResponse.json({ data: vocab });
@@ -32,7 +32,8 @@ export async function POST(req: Request) {
   }
 
   try {
-    const { word, partOfSpeech, definition, contextSentence } = await req.json();
+    const { word, partOfSpeech, definition, contextSentence } =
+      await req.json();
 
     const vocab = await prisma.vocabularyBank.create({
       data: {
@@ -40,8 +41,8 @@ export async function POST(req: Request) {
         word,
         partOfSpeech,
         definition,
-        contextSentence
-      }
+        contextSentence,
+      },
     });
 
     return NextResponse.json({ data: vocab });

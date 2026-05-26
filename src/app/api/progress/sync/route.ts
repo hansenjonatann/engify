@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { headers } from "next/headers";
 
-const prisma = new PrismaClient();
+export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
   const session = await auth.api.getSession({
@@ -23,20 +23,20 @@ export async function POST(req: Request) {
         userId_chapterId_topicId: {
           userId: session.user.id,
           chapterId,
-          topicId
-        }
+          topicId,
+        },
       },
       update: {
         isCompleted: isCompleted ?? true,
-        lastReadAt: new Date()
+        lastReadAt: new Date(),
       },
       create: {
         userId: session.user.id,
         levelId,
         chapterId,
         topicId,
-        isCompleted: isCompleted ?? true
-      }
+        isCompleted: isCompleted ?? true,
+      },
     });
 
     return NextResponse.json({ data: progress });
